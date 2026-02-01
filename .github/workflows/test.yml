@@ -32,6 +32,10 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
+      - name: Install Lua 5.1 dev package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y liblua5.1-0-dev pkg-config
       - run: cargo clean
       - run: |
           cargo build --all-features
@@ -119,6 +123,10 @@ jobs:
           fetch-depth: 0
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.head_ref }}
+      - name: Install Lua 5.1 dev package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y liblua5.1-0-dev pkg-config
       - uses: rui314/setup-mold@725a8794d15fc7563f59595bd9556495c0564878 # v1
       - uses: taiki-e/install-action@45a93d9c71692daf99a53feb97366fb6f4c3757f # v2
         with:

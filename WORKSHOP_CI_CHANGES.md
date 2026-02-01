@@ -10,6 +10,7 @@
 - 全ジョブに `cargo clean` を追加して増分ビルドを無効化
 - `lint` と `windows-e2e` でアーティファクト再利用をやめ、毎回ビルド
 - 全ジョブで `npm install` を実行
+- Linuxジョブで Lua 5.1 の開発パッケージを追加インストール
 - Lintを重くするため、重複チェックを追加
   - `cargo check --all-features --all-targets` を追加
   - `cargo clippy --no-default-features` を追加
