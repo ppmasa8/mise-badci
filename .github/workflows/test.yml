@@ -30,10 +30,9 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
         with:
-          shared-key: build
-          save-if: false
+          fetch-depth: 0
+      - run: cargo clean
       - run: |
           cargo build --all-features
           echo "$PWD/target/debug" >> "$GITHUB_PATH"
@@ -43,8 +42,10 @@ jobs:
           name: mise-ubuntu-latest
           path: target/debug/mise
       - uses: ./.github/actions/mise-tools
+      - run: npm install
 
   build-windows:
+    needs: [build-ubuntu]
     runs-on: windows-latest
     timeout-minutes: 60
     env:
@@ -52,10 +53,9 @@ jobs:
       MISE_CACHE_DIR: ~/.cache/mise
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
         with:
-          shared-key: build
-          save-if: ${{ github.ref == 'refs/heads/main' }}
+          fetch-depth: 0
+      - run: cargo clean
       - shell: pwsh
         run: |
           cargo build
@@ -66,8 +66,10 @@ jobs:
           name: mise-windows-latest
           path: target/debug/mise.exe
       - uses: ./.github/actions/mise-tools
+      - run: npm install
 
   unit:
+    needs: [build-windows]
     strategy:
       fail-fast: false
       # matrix: { os: [ubuntu-latest, macos-latest] }
@@ -77,16 +79,15 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          fetch-depth: 0
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.head_ref }}
-      - uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
-        with:
-          shared-key: build
-          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo clean
       - run: |
           cargo build --all-features
           echo "$PWD/target/debug" >> "$GITHUB_PATH"
       - uses: ./.github/actions/mise-tools
+      - run: npm install
       - run: mise x -- cargo test --all-features
 
   # nightly:
@@ -111,33 +112,31 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [build-ubuntu]
+    needs: [unit]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          fetch-depth: 0
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.head_ref }}
       - uses: rui314/setup-mold@725a8794d15fc7563f59595bd9556495c0564878 # v1
       - uses: taiki-e/install-action@45a93d9c71692daf99a53feb97366fb6f4c3757f # v2
         with:
           tool: cargo-deny,cargo-msrv,cargo-machete
-      - uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
-        with:
-          shared-key: build
-          save-if: ${{ github.ref == 'refs/heads/main' }}
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: mise-ubuntu-latest
-          path: target/debug
+      - run: cargo clean
+      - run: cargo build --all-features
       - run: echo "$PWD/target/debug" >> "$GITHUB_PATH" && chmod +x target/debug/mise
       - uses: ./.github/actions/mise-tools
+      - run: npm install
       - run: mise x -- bun i
       - run: rm -rf ~/.cargo/advisory-dbs && cargo deny check
       - run: cargo msrv verify
       - run: cargo machete --with-metadata
       - run: ./scripts/test-standalone.sh
       - run: mise run lint
-      - run: cargo clippy -- -D warnings
+      - run: cargo check --all-features --all-targets
+      - run: cargo clippy --no-default-features -- -D warnings
+      - run: cargo clippy --all-features -- -D warnings
       - run: cargo clippy --all-features --all-targets -- -D warnings
 
   # coverage:
@@ -197,6 +196,7 @@ jobs:
   #         max_attempts: 2
   #         command: mise run test:coverage
   windows-unit:
+    needs: [lint]
     runs-on: windows-latest
     timeout-minutes: 30
     env:
@@ -204,10 +204,10 @@ jobs:
       MISE_CACHE_DIR: ~/.cache/mise
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
         with:
-          shared-key: build
-          save-if: ${{ github.ref == 'refs/heads/main' }}
+          fetch-depth: 0
+      - run: cargo clean
+      - run: npm install
       - name: cargo test
         uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
@@ -218,19 +218,19 @@ jobs:
   windows-e2e:
     runs-on: windows-latest
     timeout-minutes: 40
-    needs: [build-windows]
+    needs: [windows-unit]
     env:
       MISE_DATA_DIR: ~/.local/share/mise
       MISE_CACHE_DIR: ~/.cache/mise
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: mise-windows-latest
-          path: target/debug
-      - run: ls target\debug
+          fetch-depth: 0
+      - run: cargo clean
+      - run: cargo build
       - run: Add-Content $env:GITHUB_PATH "$env:GITHUB_WORKSPACE\target\debug"
       - uses: ./.github/actions/mise-tools
+      - run: npm install
       - name: e2e
         uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
