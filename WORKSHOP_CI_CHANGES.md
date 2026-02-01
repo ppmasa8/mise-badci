@@ -11,11 +11,6 @@
 - `lint` と `windows-e2e` でアーティファクト再利用をやめ、毎回ビルド
 - 全ジョブで `npm install` を実行
 - Linuxジョブで Lua 5.1 の開発パッケージを追加インストール
-- Lintを重くするため、重複チェックを追加
-  - `cargo check --all-features --all-targets` を追加
-  - `cargo clippy --no-default-features` を追加
-  - `cargo clippy --all-features` を追加
-  - `cargo clippy --all-features --all-targets` を維持（3回以上の実行）
 - 並列数を減らすため、ジョブを直列実行に変更
   - `build-ubuntu → build-windows → unit → lint → windows-unit → windows-e2e`
 
@@ -37,8 +32,5 @@
   - `lint` と `windows-e2e` でビルド成果物を使う
 - `npm install` の削減
   - 必要なジョブに限定し、npmキャッシュも導入
-- Lintの重複削減
-  - `cargo clippy` を1回に統合（例: `--all-features --all-targets`）
-  - `cargo check` を削除（clippyで十分なら）
 - 並列数の見直し
   - `needs` の鎖を外して本来の並列実行に戻す

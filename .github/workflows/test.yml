@@ -142,9 +142,7 @@ jobs:
       - run: cargo machete --with-metadata
       - run: ./scripts/test-standalone.sh
       - run: mise run lint
-      - run: cargo check --all-features --all-targets
-      - run: cargo clippy --no-default-features -- -D warnings
-      - run: cargo clippy --all-features -- -D warnings
+      - run: cargo clippy -- -D warnings
       - run: cargo clippy --all-features --all-targets -- -D warnings
 
   # coverage:
