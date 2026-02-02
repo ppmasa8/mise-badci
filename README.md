@@ -29,6 +29,13 @@
 
 </div>
 
+
+## ワークショップまでに追加するべきもの
+- 想定解法と解説、実際の実行時間
+- ルール
+- forkしてpull requestを作る簡単な方法(how to use)
+- 
+
 ## What is it?
 
 - Like [asdf](https://asdf-vm.com) (or [nvm](https://github.com/nvm-sh/nvm) or [pyenv](https://github.com/pyenv/pyenv) but for any language) it manages [dev tools](https://mise.jdx.dev/dev-tools/) like node, python, cmake, terraform, and [hundreds more](https://mise.jdx.dev/registry.html).
