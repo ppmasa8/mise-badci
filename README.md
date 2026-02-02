@@ -29,12 +29,10 @@
 
 </div>
 
-
 ## ワークショップまでに追加するべきもの
 - 想定解法と解説、実際の実行時間
 - ルール
 - forkしてpull requestを作る簡単な方法(how to use)
-- 
 
 ## What is it?
 
