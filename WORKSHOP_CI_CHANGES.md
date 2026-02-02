@@ -11,8 +11,9 @@
 - `lint` と `windows-e2e` でアーティファクト再利用をやめ、毎回ビルド
 - 全ジョブで `npm install` を実行
 - Linuxジョブで Lua 5.1 の開発パッケージを追加インストール
-- 並列数を減らすため、ジョブを直列実行に変更
-  - `build-ubuntu → build-windows → unit → lint → windows-unit → windows-e2e`
+- 並列数を減らすため、2レーン並列に変更
+  - Linuxレーン: `build-ubuntu → unit → lint`
+  - Windowsレーン: `build-windows → windows-unit → windows-e2e`
 
 ## 触ったファイル
 
@@ -33,4 +34,4 @@
 - `npm install` の削減
   - 必要なジョブに限定し、npmキャッシュも導入
 - 並列数の見直し
-  - `needs` の鎖を外して本来の並列実行に戻す
+  - 2レーン構成を見直し、必要に応じて同時実行を増やす
