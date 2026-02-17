@@ -118,7 +118,7 @@ sources = ["mise"]
 outputs = ["README.md"]
 run = [
   "mise render-help",
-  "mise run show-output-on-failure -- mise x node@latest -- npx markdown-magic",
+  "mise run show-output-on-failure -- mise x node@24.13.0 -- npx markdown-magic",
 ]
 
 [render]
@@ -186,6 +186,6 @@ run = ["mise run lint"]
 
 [flamegraph]
 description = 'Generate a flamegraph for performance analysis'
-tools = { "cargo:flamegraph" = "latest" }
+tools = { "cargo:flamegraph" = "0.6.11" }
 env = { CARGO_PROFILE_RELEASE_DEBUG = "true" }
 run = 'cargo flamegraph'

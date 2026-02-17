@@ -18,6 +18,7 @@ env:
   MISE_EXPERIMENTAL: 1
   MISE_LOCKFILE: 1
   RUST_BACKTRACE: 1
+  MISE_AQUA_GITHUB_ATTESTATIONS: "false"
   GITHUB_TOKEN: ${{ secrets.MISE_GH_TOKEN || secrets.GITHUB_TOKEN }}
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
 
@@ -26,7 +27,7 @@ permissions:
 
 jobs:
   build-ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -43,13 +44,13 @@ jobs:
       - run: mise -v
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: mise-ubuntu-latest
+          name: mise-ubuntu-24-04
           path: target/debug/mise
       - uses: ./.github/actions/mise-tools
       - run: npm install
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 60
     env:
       MISE_DATA_DIR: ~/.local/share/mise
@@ -66,7 +67,7 @@ jobs:
       - run: mise -v
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: mise-windows-latest
+          name: mise-windows-2022
           path: target/debug/mise.exe
       - uses: ./.github/actions/mise-tools
       - run: npm install
@@ -75,8 +76,8 @@ jobs:
     needs: [build-ubuntu]
     strategy:
       fail-fast: false
-      # matrix: { os: [ubuntu-latest, macos-latest] }
-      matrix: { os: [macos-latest] }
+      # matrix: { os: [ubuntu-24.04, macos-14] }
+      matrix: { os: [macos-14] }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
@@ -94,7 +95,7 @@ jobs:
       - run: mise x -- cargo test --all-features
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [unit]
     steps:
@@ -110,7 +111,7 @@ jobs:
       - uses: rui314/setup-mold@725a8794d15fc7563f59595bd9556495c0564878 # v1
       - uses: taiki-e/install-action@45a93d9c71692daf99a53feb97366fb6f4c3757f # v2
         with:
-          tool: cargo-deny,cargo-msrv,cargo-machete
+          tool: cargo-deny@0.19.0,cargo-msrv@0.18.4,cargo-machete@0.9.1
       - run: cargo clean
       - run: cargo build --all-features
       - run: echo "$PWD/target/debug" >> "$GITHUB_PATH" && chmod +x target/debug/mise
@@ -127,7 +128,7 @@ jobs:
 
   windows-unit:
     needs: [build-windows]
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 30
     env:
       MISE_DATA_DIR: ~/.local/share/mise
@@ -146,7 +147,7 @@ jobs:
           max_attempts: 2
           command: cargo test
   windows-e2e:
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 40
     needs: [windows-unit]
     env:
@@ -170,7 +171,7 @@ jobs:
           command: pwsh e2e-win\run.ps1
 
   test-ci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     needs:
       - build-ubuntu
