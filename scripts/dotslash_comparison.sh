@@ -17,8 +17,8 @@ PATH="$TEMP_DIR:$PATH"
 # Set up mise config for dependencies
 cat >.mise.toml <<'EOF'
 [tools]
-hyperfine = "latest"
-"ubi:facebook/dotslash" = "latest"
+hyperfine = "1.20.0"
+"ubi:facebook/dotslash" = "0.5.8"
 node = "20.0.0"
 EOF
 

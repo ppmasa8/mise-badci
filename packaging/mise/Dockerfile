@@ -29,7 +29,7 @@ apt-get update && apt-get install -y \
     python3-pip
 rm -rf /var/lib/apt/lists/* && apt-get clean
 
-mise use -g node@lts python@latest
+mise use -g node@24.13.1 python@3.14.3
 
 mise -v
 EOT
